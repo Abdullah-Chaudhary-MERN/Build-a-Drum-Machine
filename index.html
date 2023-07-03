@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Build a Drum Machine</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+   *,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+h1 {
+  text-align: center;
+}
+
+main {
+  width: 100%;
+}
+
+#drum-machine {
+  width: 500px;
+  margin: 0 auto;
+  display: flex;
+}
+
+#drum-machine > .keyboard {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+#drum-machine > .keyboard > .drum-pad {
+  display: flex;
+  padding: 20px;
+  flex-basis: calc(33% - 10px);
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+  background-color: #5a5a5a;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 5px;
+  box-shadow: 3px 3px 6px 2px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  user-select: none;
+}
+
+#drum-machine > .keyboard > .drum-pad.active {
+  background-color: #ff7e00;
+  box-shadow: inset 2px 2px 6px 1px rgba(0, 0, 0, 0.7);
+}
+
+#drum-machine > .controls {
+  flex: 1;
+  padding: 10px;
+}
+
+#drum-machine > .controls > #display {
+  height: 50px;
+  background-color: #808080;
+  color: #000;
+  text-align: center;
+  line-height: 50px;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.button > .label {
+  width: 65px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.button > .container {
+  width: 45px;
+  height: 21px;
+  border: 3px solid #5a5a5a;
+  background-color: #5a5a5a;
+  display: inline-block;
+}
+
+.button > .container > .cube {
+  width: 15px;
+  height: 15px;
+  background-color: #ff7e00;
+}
+
+.button > .container > .cube.on {
+  float: right;
+}
+
+.button > input[type='range'] {
+  overflow: hidden;
+  width: 100%;
+  outline: none;
+}
+
+  </style>
+</head>
+<body id="body" >
+    <h1>Build a Drum Machine</h1>
+<main>
+		<div id="drum-machine">
+				<div class="keyboard">
+						<div id="drumQ" class="drum-pad">
+								<audio class="clip" id="Q" src=""></audio>
+								<span>Q</span>
+						</div>
+						<div id="drumW" class="drum-pad">
+								<audio class="clip" id="W" src=""></audio>
+								<span>W</span>
+						</div>
+						<div id="drumE" class="drum-pad">
+								<audio class="clip" id="E" src=""></audio>
+								<span>E</span>
+						</div>
+						<div id="drumA" class="drum-pad">
+								<audio class="clip" id="A" src=""></audio>
+								<span>A</span>
+						</div>
+						<div id="drumS" class="drum-pad">
+								<audio class="clip" id="S" src=""></audio>
+								<span>S</span>
+						</div>
+						<div id="drumD" class="drum-pad">
+								<audio class="clip" id="D" src=""></audio>
+								<span>D</span>
+						</div>
+						<div id="drumZ" class="drum-pad">
+								<audio class="clip" id="Z" src=""></audio>
+								<span>Z</span>
+						</div>
+						<div id="drumX" class="drum-pad">
+								<audio class="clip" id="X" src=""></audio>
+								<span>X</span>
+						</div>
+						<div id="drumC" class="drum-pad">
+								<audio class="clip" id="C" src=""></audio>
+								<span>C</span>
+						</div>
+				</div>
+				<div class="controls">
+						<div id="display"></div>
+						<div class="button">
+								<label for="powerBtn" class="label">power</label>
+								<div id="powerBtn" class="container">
+										<div class="cube"></div>
+								</div>
+						</div>
+						<div class="button">
+								<label for="bankBtn" class="label">Bank</label>
+								<div id="bankBtn" class="container">
+										<div class="cube"></div>
+								</div>
+						</div>
+						<div class="button">
+								<input type="range" name="volume" min="0" max="1" step="0.01" value="0.5" />
+						</div>
+				</div>
+		</div>
+</main>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    ;(function() {
+		let drumPad = document.querySelectorAll('.drum-pad')
+		let audio = document.querySelectorAll('.clip')
+		let showArea = document.querySelector('#display')
+		let bankBtn = document.querySelector('#bankBtn')
+		let powerBtn = document.querySelector('#powerBtn')
+		let volumeBtn = document.querySelector('input[type="range"]')
+		let bankNum = 1
+		let powerFlag = false
+		let data = {
+				Q: [
+						{ name: 'Heater 1', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Bld_H1.mp3' },
+						{ name: 'Chord 1', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Brk_Snr.mp3' }
+				],
+				W: [
+						{ name: 'Heater 2', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Cev_H2.mp3' },
+						{ name: 'Chord 2', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Chord_1.mp3' }
+				],
+				E: [
+						{ name: 'Heater 3', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Chord_2.mp3' },
+						{ name: 'Chord 3', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Chord_3.mp3' }
+				],
+				A: [
+						{ name: 'Heater 4', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Dry_Ohh.mp3' },
+						{
+								name: 'Give us a light',
+								audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Dsc_Oh.mp3'
+						}
+				],
+				S: [
+						{ name: 'Heater 6', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Heater-1.mp3' },
+						{ name: 'Dry Ohh', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Heater-2.mp3' }
+				],
+				D: [
+						{ name: 'Dsc Oh', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Heater-3.mp3' },
+						{ name: 'Bld H1', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Heater-4_1.mp3' }
+				],
+				Z: [
+						{ name: 'Kick n Hat', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Heater-6.mp3' },
+						{
+								name: 'punchy kick 1',
+								audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Kick_n_Hat.mp3'
+						}
+				],
+				X: [
+						{ name: 'RP4 KICK 1', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/RP4_KICK_1.mp3' },
+						{ name: 'side stick 1', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/punchy_kick_1.mp3' }
+				],
+				C: [
+						{ name: 'Cev H2', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/side_stick_1.mp3' },
+						{ name: 'Brk Snr', audio: 'https://github.com/Abdullah-Chaudhary-MERN/Drum-Machine-Audio/raw/main/Kick_n_Hat.mp3' }
+				]
+		}
+		function clickDrum(key) {
+				if (powerFlag) return false
+				key = this.querySelector('audio').id
+				stopAudio()
+				this.classList.add('active')
+				showArea.textContent = data[key][bankNum].name
+				this.querySelector('audio').play()
+				setTimeout(() => {
+						this.classList.remove('active')
+				}, 500)
+		}
+
+		function keyupHandler(e) {
+				switch (e.key.toUpperCase()) {
+						case 'Q':
+								document.querySelector('#drumQ').click()
+								break
+						case 'W':
+								document.querySelector('#drumW').click()
+								break
+						case 'E':
+								document.querySelector('#drumE').click()
+								break
+						case 'A':
+								document.querySelector('#drumA').click()
+								break
+						case 'S':
+								document.querySelector('#drumS').click()
+								break
+						case 'D':
+								document.querySelector('#drumD').click()
+								break
+						case 'Z':
+								document.querySelector('#drumZ').click()
+								break
+						case 'X':
+								document.querySelector('#drumX').click()
+								break
+						case 'C':
+								document.querySelector('#drumC').click()
+								break
+						default:
+								return false
+				}
+		}
+
+		function switchBtn(e) {
+				this.querySelector('.cube').classList.toggle('on')
+				let flag = this.querySelector('.cube').classList.contains('on')
+				let target = e.target.id === '' ? e.target.parentElement.id : e.target.id
+				if (target === 'bankBtn') flag ? (bankNum = 0) : (bankNum = 1)
+				if (target === 'powerBtn') {
+						showArea.textContent = ''
+						powerFlag = !powerFlag
+				}
+				setAudio(bankNum)
+		}
+
+		function changeVolume() {
+				showArea.textContent = `volume：${Math.floor(this.value * 100)}`
+				setVolume(this.value)
+		}
+		function leaveVolume() {
+				showArea.textContent = ''
+		}
+
+		function setAudio(idx) {
+				document.querySelectorAll('.clip').forEach((item, index) => {
+						item.src = data[item.id][idx].audio
+				})
+		}
+
+		function stopAudio() {
+				audio.forEach(item => {
+						item.pause()
+						item.currentTime = 0
+				})
+		}
+
+		function setVolume(val) {
+				audio.forEach(item => {
+						item.volume = val
+				})
+		}
+
+		drumPad.forEach(item => item.addEventListener('click', clickDrum))
+		bankBtn.addEventListener('click', switchBtn)
+		powerBtn.addEventListener('click', switchBtn)
+		volumeBtn.addEventListener('change', changeVolume)
+		volumeBtn.addEventListener('mousemove', changeVolume)
+		volumeBtn.addEventListener('mouseleave', leaveVolume)
+		window.addEventListener('keyup', keyupHandler)
+		setAudio(bankNum)
+})()
+  </script>
+</body>
+</html>
